@@ -14,3 +14,9 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.authForm {
+  max-width: '380px';
+  width: '100%';
+  margin-top: '20px';
+}
