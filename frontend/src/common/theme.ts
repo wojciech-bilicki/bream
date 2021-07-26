@@ -41,6 +41,9 @@ const theme = createTheme({
     MuiLink: {
     
       root: {
+        '&:hover': {
+          textDecoration: 'none'
+        },
         '& .MuiTypography-body1': {
           color: 'white'
         },
