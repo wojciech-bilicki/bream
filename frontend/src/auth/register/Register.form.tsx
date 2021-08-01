@@ -18,18 +18,32 @@ import {
 import { Autocomplete } from "@material-ui/lab";
 import React, { useState } from "react";
 import NextLink from "next/link";
+import Joi from "@hapi/joi";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { joiResolver } from "@hookform/resolvers/joi";
 
 import countries, { Country } from "../../../assets/countryList";
 import AuthButton from "../components/AuthButton";
 import CheckboxWithLabel from "../components/CheckboxWithLabel";
 import EpicTextField from "../components/EpicTextField";
 import PasswordInput from "../components/PasswordInput";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
 
-interface RegisterFormProps {}
+const validationSchema = Joi.object({
+  countryCode: Joi.string().allow(...countries.map((country) => country.code)),
+  email: Joi.string().required(),
+  name: Joi.string().required(),
+  surname: Joi.string().required(),
+  displayName: Joi.string().required(),
+  password: Joi.string().required().min(6),
+  subscribedToNewsletter: Joi.boolean(),
+  termsAccepted: Joi.boolean().invalid(false).messages({
+    "any.invalid": "Please confirm this field",
+  }),
+});
 
 interface RegisterFormInput {
-  country: Country | null;
+  email: string;
+  countryCode: string | null;
   name: string;
   surname: string;
   displayName: string;
@@ -38,25 +52,35 @@ interface RegisterFormInput {
   termsAccepted: boolean;
 }
 
-const RegisterForm: React.FC<RegisterFormProps> = ({}) => {
+const RegisterForm: React.FC = () => {
   const classes = useStyles();
 
-  const { control, handleSubmit } = useForm();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormInput>({
+    resolver: joiResolver(validationSchema),
+  });
 
   const onSubmit = (data: RegisterFormInput) => {
+    console.log(errors);
     console.log(data);
   };
 
+  console.log(errors);
   return (
     <form className="authForm" onSubmit={handleSubmit(onSubmit)}>
       <Controller
-        name="country"
+        name="countryCode"
         defaultValue={null}
         control={control}
         render={({ field }) => (
           <Autocomplete<Country | null>
             {...field}
-            onChange={(_, chosenCountry) => field.onChange(chosenCountry)}
+            defaultValue={null}
+            value={countries.find((country) => field.value === country.code)}
+            onChange={(_, chosenCountry) => field.onChange(chosenCountry?.code)}
             classes={{
               paper: classes.autocompletePaper,
               option: classes.autocompleteOption,
@@ -71,6 +95,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({}) => {
                 fullWidth={true}
                 variant="outlined"
                 label="Countries"
+                error={!!errors.countryCode}
+                helperText={errors.countryCode?.message}
               />
             )}
             options={countries}
@@ -90,6 +116,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({}) => {
               required={true}
               label="Name"
               variant="outlined"
+              error={!!errors.name}
+              helperText={errors.name?.message}
             />
           )}
         />
@@ -104,6 +132,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({}) => {
               required={true}
               label="Surname"
               variant="outlined"
+              error={!!errors.surname}
+              helperText={errors.surname?.message}
             />
           )}
         />
@@ -121,6 +151,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({}) => {
             required={true}
             fullWidth={true}
             label="Display name"
+            error={!!errors.displayName}
+            helperText={errors.displayName?.message}
             InputProps={{
               endAdornment: (
                 <InputAdornment key="tooltip" position="end">
@@ -140,12 +172,32 @@ const RegisterForm: React.FC<RegisterFormProps> = ({}) => {
       />
       <Controller
         defaultValue=""
+        name="email"
+        control={control}
+        render={({ field: { ref, ...rest } }) => (
+          <EpicTextField
+            {...rest}
+            fullWidth={true}
+            type="email"
+            inputRef={ref}
+            required={true}
+            label="Email"
+            variant="outlined"
+            error={!!errors.email}
+            helperText={errors.email?.message}
+          />
+        )}
+      />
+      <Controller
+        defaultValue=""
         name="password"
         control={control}
         render={({ field: { ref, ...rest } }) => (
           <PasswordInput
             {...rest}
             inputRef={ref}
+            error={!!errors.password}
+            helperText={errors.password?.message}
             additionalAdornments={[
               <InputAdornment key="tooltip" position="end">
                 <Tooltip
@@ -171,6 +223,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({}) => {
         render={({ field: { ref, ...rest } }) => (
           <CheckboxWithLabel
             {...rest}
+            error={!!errors.termsAccepted}
+            helperText={errors.termsAccepted?.message}
             inputRef={ref}
             label={
               <Typography variant="body1">

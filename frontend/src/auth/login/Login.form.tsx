@@ -18,16 +18,33 @@ import AuthButton from "../components/AuthButton";
 import EpicTextField from "../components/EpicTextField";
 import PasswordInput from "../components/PasswordInput";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-
-interface LoginFormProps {}
+import Joi from "@hapi/joi";
+import { joiResolver } from "@hookform/resolvers/joi";
 
 interface LoginFormInput {
   email: string;
   password: string;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({}) => {
-  const { control, handleSubmit } = useForm<LoginFormInput>();
+const validationSchema = Joi.object({
+  email: Joi.string()
+    .email({
+      tlds: {
+        allow: false,
+      },
+    })
+    .required(),
+  password: Joi.string().required(),
+});
+
+const LoginForm: React.FC = () => {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormInput>({
+    resolver: joiResolver(validationSchema),
+  });
 
   const classes = useStyles();
 
@@ -35,6 +52,7 @@ const LoginForm: React.FC<LoginFormProps> = ({}) => {
     console.log(data);
   };
 
+  console.log(errors);
   return (
     <form className="authForm" onSubmit={handleSubmit(onSubmit)}>
       <Controller
@@ -44,6 +62,8 @@ const LoginForm: React.FC<LoginFormProps> = ({}) => {
         render={({ field: { ref, ...rest } }) => (
           <EpicTextField
             {...rest}
+            error={!!errors.email}
+            helperText={errors.email?.message}
             inputRef={ref}
             fullWidth={true}
             variant="outlined"
@@ -57,7 +77,12 @@ const LoginForm: React.FC<LoginFormProps> = ({}) => {
         control={control}
         defaultValue=""
         render={({ field: { ref, ...rest } }) => (
-          <PasswordInput {...rest} inputRef={ref} />
+          <PasswordInput
+            {...rest}
+            inputRef={ref}
+            error={!!errors.password}
+            helperText={errors.password?.message}
+          />
         )}
       />
 
