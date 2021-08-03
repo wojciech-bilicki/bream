@@ -12,6 +12,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { CheckBox, Visibility, VisibilityOff } from "@material-ui/icons";
 import React, { useState } from "react";
 import NextLink from "next/link";
+import { useMutation } from "react-query";
 
 import { LogoIcon } from "../../../assets/icons";
 import AuthButton from "../components/AuthButton";
@@ -20,11 +21,7 @@ import PasswordInput from "../components/PasswordInput";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Joi from "@hapi/joi";
 import { joiResolver } from "@hookform/resolvers/joi";
-
-interface LoginFormInput {
-  email: string;
-  password: string;
-}
+import { login, LoginFormInput } from "../auth.api";
 
 const validationSchema = Joi.object({
   email: Joi.string()
@@ -38,6 +35,19 @@ const validationSchema = Joi.object({
 });
 
 const LoginForm: React.FC = () => {
+  const [wrongCredentialsError, setWrongCredentialsError] = useState(false);
+
+  const loginMutation = useMutation(login, {
+    onSuccess: () => {
+      console.log("Logged in!");
+    },
+    onError: (err) => {
+      if (err.response.status === 401) {
+        setWrongCredentialsError(true);
+      }
+    },
+  });
+
   const {
     control,
     handleSubmit,
@@ -49,6 +59,8 @@ const LoginForm: React.FC = () => {
   const classes = useStyles();
 
   const onSubmit: SubmitHandler<LoginFormInput> = (data) => {
+    setWrongCredentialsError(false);
+    loginMutation.mutate(data);
     console.log(data);
   };
 
@@ -62,8 +74,11 @@ const LoginForm: React.FC = () => {
         render={({ field: { ref, ...rest } }) => (
           <EpicTextField
             {...rest}
-            error={!!errors.email}
-            helperText={errors.email?.message}
+            error={!!errors.email || wrongCredentialsError}
+            helperText={
+              errors.email?.message ||
+              (wrongCredentialsError && "Wrong credentials")
+            }
             inputRef={ref}
             fullWidth={true}
             variant="outlined"
@@ -80,8 +95,11 @@ const LoginForm: React.FC = () => {
           <PasswordInput
             {...rest}
             inputRef={ref}
-            error={!!errors.password}
-            helperText={errors.password?.message}
+            error={!!errors.password || wrongCredentialsError}
+            helperText={
+              errors.password?.message ||
+              (wrongCredentialsError && "Wrong credentials")
+            }
           />
         )}
       />
