@@ -10,6 +10,18 @@ class User {
 
   @Column()
   password: string;
+
+  @Column("text", { unique: true })
+  displayName: string;
+
+  @Column("text")
+  surname: string;
+
+  @Column("text")
+  countryCode: string;
+
+  @Column("boolean")
+  subscribedToNewsletter: boolean;
 }
 
 export default User;

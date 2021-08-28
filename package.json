@@ -32,6 +32,8 @@
     "@types/bcrypt": "^5.0.0",
     "@types/hapi__joi": "^17.1.6",
     "bcrypt": "^5.0.1",
+    "class-transformer": "^0.4.0",
+    "class-validator": "^0.13.1",
     "cookie-parser": "^1.4.5",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",

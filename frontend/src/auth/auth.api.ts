@@ -1,24 +1,39 @@
 import Api from "../common/api";
 
+export const login = async (formInput: LoginFormInput) => {
+  const { data } = await Api.post<UserAuthResponse, LoginFormInput>({
+    url: "/auth/login",
+    data: formInput,
+  });
+
+  const rest = await Api.get("/collections");
+  console.log(rest);
+};
+
+export const register = async (registerInput: RegisterFormInput) => {
+  const { data } = await Api.post<UserAuthResponse, RegisterFormInput>({
+    url: "/auth/register",
+    data: registerInput,
+  });
+};
+
+export interface RegisterFormInput {
+  email: string;
+  countryCode: string | null;
+  name: string;
+  surname: string;
+  displayName: string;
+  password: string;
+  subscribedToNewsletter: boolean;
+  termsAccepted: boolean;
+}
+
 export interface LoginFormInput {
   email: string;
   password: string;
 }
 
-interface LoginResponse {
+interface UserAuthResponse {
   id: string;
   email: string;
 }
-
-export const login = async (formInput: LoginFormInput) => {
-  // try {
-  const { data } = await Api.post<LoginResponse, LoginFormInput>({
-    url: "/auth/login",
-    data: formInput,
-  });
-  // } catch (err) {
-  //   console.log(JSON.stringify(err));
-  //   console.log(err.response);
-  //   console.log(err.statusCode);
-  // }
-};

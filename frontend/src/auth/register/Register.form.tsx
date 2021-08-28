@@ -27,6 +27,8 @@ import AuthButton from "../components/AuthButton";
 import CheckboxWithLabel from "../components/CheckboxWithLabel";
 import EpicTextField from "../components/EpicTextField";
 import PasswordInput from "../components/PasswordInput";
+import { register, RegisterFormInput } from "../auth.api";
+import { useMutation } from "react-query";
 
 const validationSchema = Joi.object({
   countryCode: Joi.string().allow(...countries.map((country) => country.code)),
@@ -41,34 +43,38 @@ const validationSchema = Joi.object({
   }),
 });
 
-interface RegisterFormInput {
-  email: string;
-  countryCode: string | null;
-  name: string;
-  surname: string;
-  displayName: string;
-  password: string;
-  subscribedToNewsletter: boolean;
-  termsAccepted: boolean;
-}
-
 const RegisterForm: React.FC = () => {
   const classes = useStyles();
 
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<RegisterFormInput>({
     resolver: joiResolver(validationSchema),
   });
 
+  const { mutate: registerUser } = useMutation(register, {
+    onSuccess: () => {
+      console.log("registered");
+    },
+    onError: (error) => {
+      if (error.response.status === 400) {
+        const errorArray = error.response.data.message;
+        errorArray.forEach((error) => {
+          setError(error.property, {
+            message: Object.values(error.constraints)[0],
+          });
+        });
+      }
+    },
+  });
+
   const onSubmit = (data: RegisterFormInput) => {
-    console.log(errors);
-    console.log(data);
+    registerUser(data);
   };
 
-  console.log(errors);
   return (
     <form className="authForm" onSubmit={handleSubmit(onSubmit)}>
       <Controller
@@ -214,7 +220,20 @@ const RegisterForm: React.FC = () => {
         )}
       />
 
-      <CheckboxWithLabel label="I want to receive information about news, surveys and promotions from Epic Games." />
+      <Controller
+        control={control}
+        name="subscribedToNewsletter"
+        defaultValue={false}
+        render={({ field: { ref, ...rest } }) => (
+          <CheckboxWithLabel
+            {...rest}
+            error={!!errors.subscribedToNewsletter}
+            helperText={!!errors.subscribedToNewsletter?.message}
+            inputRef={ref}
+            label="I want to receive information about news, surveys and promotions from Epic Games."
+          />
+        )}
+      />
 
       <Controller
         defaultValue={false}

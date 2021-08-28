@@ -22,6 +22,7 @@ import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Joi from "@hapi/joi";
 import { joiResolver } from "@hookform/resolvers/joi";
 import { login, LoginFormInput } from "../auth.api";
+import { useRouter } from "next/dist/client/router";
 
 const validationSchema = Joi.object({
   email: Joi.string()
@@ -36,10 +37,12 @@ const validationSchema = Joi.object({
 
 const LoginForm: React.FC = () => {
   const [wrongCredentialsError, setWrongCredentialsError] = useState(false);
+  const { push } = useRouter();
 
   const loginMutation = useMutation(login, {
     onSuccess: () => {
       console.log("Logged in!");
+      push("/");
     },
     onError: (err) => {
       if (err.response.status === 401) {

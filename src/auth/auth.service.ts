@@ -16,19 +16,34 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async register({ password, email }: CreateUserDto) {
+  async register(registrationData: CreateUserDto) {
     // TODO: add validation
     try {
-      const hashedPassword = await bcrypt.hash(password, 12);
+      const hashedPassword = await bcrypt.hash(registrationData.password, 12);
       const user = await this.userService.create({
-        email,
+        ...registrationData,
         password: hashedPassword,
       });
       user.password = undefined;
       return user;
     } catch (e) {
       if (e?.code === PostgresErrorCode.UniqueViolation) {
-        throw new HttpException("Email taken", HttpStatus.BAD_REQUEST);
+        const uniqueProperty = e?.detail.includes("email")
+          ? "email"
+          : "displayName";
+        throw new HttpException(
+          {
+            message: [
+              {
+                property: uniqueProperty,
+                constraints: {
+                  unique: `${uniqueProperty} already taken`,
+                },
+              },
+            ],
+          },
+          HttpStatus.BAD_REQUEST,
+        );
       }
       throw new HttpException(
         "Something went wrong",
@@ -49,7 +64,7 @@ export class AuthService {
   public getCookieWithJwtToken(user: User) {
     const payload: TokenPayload = { user };
     const token = this.jwtService.sign(payload);
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
+    return `Authentication=${token}; domain: 'localhost', HttpOnly; Secure; Path=/; Max-Age=${this.configService.get(
       "JWT_EXPIRATION_TIME",
     )}`;
   }

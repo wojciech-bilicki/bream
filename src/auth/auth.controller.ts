@@ -13,17 +13,15 @@ import RequestWithUser from "./interfaces/requestWithUser.i";
 import { JwtService } from "@nestjs/jwt";
 import { Response } from "express";
 import JwtAuthGuard from "./jwtAuth.guard";
+import CreateUserDto from "src/user/user.create.dto";
 
 @Controller("auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post("register")
-  async register(
-    @Body("email") email: string,
-    @Body("password") password: string,
-  ) {
-    return this.authService.register({ email, password });
+  async register(@Body() registrationData: CreateUserDto) {
+    return this.authService.register(registrationData);
   }
 
   @HttpCode(200)
