@@ -10,7 +10,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { CheckBox, Visibility, VisibilityOff } from "@material-ui/icons";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import NextLink from "next/link";
 import { useMutation } from "react-query";
 
@@ -23,6 +23,7 @@ import Joi from "@hapi/joi";
 import { joiResolver } from "@hookform/resolvers/joi";
 import { login, LoginFormInput } from "../auth.api";
 import { useRouter } from "next/dist/client/router";
+import { AuthContext } from "../Auth.context";
 
 const validationSchema = Joi.object({
   email: Joi.string()
@@ -38,10 +39,14 @@ const validationSchema = Joi.object({
 const LoginForm: React.FC = () => {
   const [wrongCredentialsError, setWrongCredentialsError] = useState(false);
   const { push } = useRouter();
+  const { setUserData } = useContext(AuthContext);
 
   const loginMutation = useMutation(login, {
-    onSuccess: () => {
+    onSuccess: (data) => {
       console.log("Logged in!");
+      if (setUserData) {
+        setUserData(data);
+      }
       push("/");
     },
     onError: (err) => {

@@ -6,8 +6,10 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { DatabaseModule } from "./database/database.module";
 import { UserModule } from "./user/user.module";
-import { AuthModule } from './auth/auth.module';
-import { CollectionsModule } from './collections/collections.module';
+import { AuthModule } from "./auth/auth.module";
+import { CollectionsModule } from "./collections/collections.module";
+import { MediaModule } from "./media/media.module";
+import { GamesModule } from "./games/games.module";
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { CollectionsModule } from './collections/collections.module';
     UserModule,
     AuthModule,
     CollectionsModule,
+    MediaModule,
+    GamesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

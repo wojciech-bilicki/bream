@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useCallback, useContext } from "react";
 import AppBar from "@material-ui/core/AppBar";
 import { Box, Button, Link, makeStyles, useTheme } from "@material-ui/core";
 import { LogoIcon } from "../../../assets/icons";
 import NavLink from "./NavLink";
 import { useRouter } from "next/dist/client/router";
 import { Language, PersonAdd } from "@material-ui/icons";
+import LanguageMenu from "./LanguageMenu";
+import { AuthContext } from "../../auth/Auth.context";
+import UserMenu from "./UserMenu";
+import { logout } from "../../auth/auth.api";
 
 const links = [
   {
@@ -28,7 +32,13 @@ const links = [
 const Header: React.FC = () => {
   const classes = useStyles();
   const router = useRouter();
-  const theme = useTheme();
+  const { userData, setUserData } = useContext(AuthContext);
+  const onLogout = useCallback(async () => {
+    if (setUserData) {
+      setUserData(undefined);
+    }
+    await logout();
+  }, [setUserData]);
   return (
     <AppBar position="fixed" className={classes.appBar}>
       <Box>
@@ -44,20 +54,19 @@ const Header: React.FC = () => {
         ))}
       </ul>
       <Box marginLeft="auto" display="flex" height="100%" alignItems="center">
-        <Box
-          display="flex"
-          alignItems="center"
-          className={classes.highlightIcon}
-        >
-          <Language className={classes.languageIcon} />
-        </Box>
-        <Link
-          href="/login"
-          className={`link ${classes.highlightIcon} ${classes.signInWrapper}`}
-        >
-          <PersonAdd />
-          <span className={classes.signIn}>Sign In</span>
-        </Link>
+        <LanguageMenu />
+        {userData ? (
+          <UserMenu userData={userData} onLogout={onLogout} />
+        ) : (
+          <Link
+            href="/login"
+            className={`link highlightIcon ${classes.signInWrapper}`}
+          >
+            <PersonAdd />
+            <span className={classes.signIn}>Sign In</span>
+          </Link>
+        )}
+
         <Button className={classes.getEpic}>get epic games</Button>
       </Box>
     </AppBar>
@@ -92,14 +101,6 @@ const useStyles = makeStyles((theme) => ({
     margin: "0 16px",
     "&:hover": {
       textDecoration: "none",
-    },
-  },
-  highlightIcon: {
-    "& svg": {
-      color: theme.palette.nav.main,
-    },
-    "&:hover svg": {
-      color: "#e7e7e7",
     },
   },
   languageIcon: {

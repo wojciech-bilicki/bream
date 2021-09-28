@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Post,
   Req,
@@ -40,5 +41,13 @@ export class AuthController {
   async logOut(@Req() _request: RequestWithUser, @Res() response: Response) {
     response.setHeader("Set-Cookie", this.authService.getCookieForLogout());
     response.send();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("verify")
+  async verify(@Req() request: RequestWithUser) {
+    const { user } = request;
+    user.password = undefined;
+    return user;
   }
 }

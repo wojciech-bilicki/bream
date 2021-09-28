@@ -1,6 +1,7 @@
 import { createTheme } from "@material-ui/core/styles";
 import red from "@material-ui/core/colors/red";
-import { getDisplayName } from "next/dist/next-server/lib/utils";
+
+const MAIN_NAV_COLOR = "#ccc";
 
 // Create a theme instance.
 const theme = createTheme({
@@ -11,6 +12,14 @@ const theme = createTheme({
           maxWidth: "380px",
           width: "100%",
           marginTop: "20px",
+        },
+        ".highlightIcon": {
+          "& svg": {
+            color: MAIN_NAV_COLOR,
+          },
+          "&:hover svg": {
+            color: "#e7e7e7",
+          },
         },
         ".link": {
           display: "flex",
@@ -64,7 +73,7 @@ const theme = createTheme({
   },
   palette: {
     nav: {
-      main: "#ccc",
+      main: MAIN_NAV_COLOR,
       light: "rgb(0, 120, 242)",
     },
     primary: {

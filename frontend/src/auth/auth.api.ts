@@ -1,20 +1,28 @@
 import Api from "../common/api";
 
 export const login = async (formInput: LoginFormInput) => {
-  const { data } = await Api.post<UserAuthResponse, LoginFormInput>({
+  const { data } = await Api.post<UserData, LoginFormInput>({
     url: "/auth/login",
     data: formInput,
   });
 
-  const rest = await Api.get("/collections");
-  console.log(rest);
+  return data;
 };
 
 export const register = async (registerInput: RegisterFormInput) => {
-  const { data } = await Api.post<UserAuthResponse, RegisterFormInput>({
+  const { data } = await Api.post<UserData, RegisterFormInput>({
     url: "/auth/register",
     data: registerInput,
   });
+};
+
+export const verify = async () => {
+  const { data } = await Api.get<UserData>("/auth/verify");
+  return data;
+};
+
+export const logout = async () => {
+  const { data } = await Api.post({ url: "/auth/logout" });
 };
 
 export interface RegisterFormInput {
@@ -28,12 +36,9 @@ export interface RegisterFormInput {
   termsAccepted: boolean;
 }
 
+export type UserData = Omit<RegisterFormInput, "termsAccepted">;
+
 export interface LoginFormInput {
   email: string;
   password: string;
-}
-
-interface UserAuthResponse {
-  id: string;
-  email: string;
 }
