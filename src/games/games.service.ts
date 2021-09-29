@@ -14,6 +14,15 @@ class GamesService {
     await this.gameRepo.save(newGame);
     return newGame;
   }
+
+  async getById(id: string) {
+    try {
+      const game = await this.gameRepo.findOne(id);
+      return game;
+    } catch {
+      return undefined;
+    }
+  }
 }
 
 export default GamesService;

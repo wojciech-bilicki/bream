@@ -3,6 +3,7 @@ import {
   Param,
   Post,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { diskStorage } from "multer";
@@ -11,12 +12,14 @@ import MediaParams from "./media.params";
 import * as path from "path";
 import { existsSync } from "fs";
 import { mkdir } from "fs/promises";
+import MediaGuard from "./media.guard";
 
 const SCREENSHOT_FOLDER_NAME = "screenshots";
 
 @Controller("media")
 export class MediaController {
   @Post("/:gameId")
+  @UseGuards(MediaGuard)
   @UseInterceptors(
     FileFieldsInterceptor(
       [
